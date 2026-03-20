@@ -1,75 +1,83 @@
-# Car Number Plate Extraction System
+# Car Number Plate Recognition System
 
-This project implements a Car Number Plate Extraction pipeline in three main steps: Detection, Alignment, and Optical Character Recognition (OCR). It was developed based on the guiding principles from "Car Number Plate Extraction in Three Steps".
+My Y3 project for automatic license plate detection and reading. Based on the book "Car Number Plate Extraction in Three Steps".
+
+## What it does
+
+Captures video from webcam and automatically reads car license plates using computer vision.
 
 ## Project Structure
 ```
-.
-├── data/
-│   ├── logs/             # Contains the CSV output logs of detected plates
-│   └── plates/           # Contains plate images
-├── src/
-│   ├── camera.py         # Validates camera functionality
-│   ├── detect.py         # Plate candidate detection using contours
-│   ├── align.py          # Plate rectification and normalization via perspective warp
-│   ├── ocr.py            # Optical character recognition using Tesseract
-│   ├── validate.py       # Regex validation against formatting norms
-│   └── temporal.py       # Full live pipeline combining all stages and logging to CSV
-├── README.md             # This documentation
+src/
+  camera.py       - tests if camera works
+  detect.py       - finds plates using contours
+  align.py        - fixes the angle/perspective
+  ocr.py          - reads the text with Tesseract
+  validate.py     - checks if format is correct
+  temporal.py     - full system with CSV logging
+
+data/
+  logs/           - CSV files with detected plates
+  plates/         - saved plate images
 ```
 
-## Features
-- **Plate Detection**: Uses contour geometry (size and aspect ratio constraints) for lightweight CPU-oriented detection.
-- **Plate Alignment**: Employs perspective transformation to warp the detected bounding box into a strictly uniform 450x140 resolution image.
-- **OCR via Tesseract**: Processes the isolated and aligned plate image to extract alphanumeric text.
-- **Regex Validation**: Validates the extracted candidates matching the layout `[A-Z]{3}[0-9]{3}[A-Z]`.
-- **Temporal Consistency**: Takes sequential readings across video frames and verifies the majority vote to avoid single-frame hallucination.
-- **CSV Logging**: Validated strings are logged with a timestamp and cooldown restrictions to avoid duplication.
+## How it works
 
-## Setup Requirements
+1. **Detection** - Finds rectangular shapes that look like plates (checks size and aspect ratio)
+2. **Alignment** - Warps the plate to 450x140 pixels so it's straight
+3. **OCR** - Uses Tesseract to read the characters
+4. **Validation** - Checks format: 3 letters + 3 numbers + 1 letter (like RAD123A)
+5. **Temporal check** - Confirms the same plate across multiple frames to avoid errors
+6. **Save** - Logs to CSV with timestamp
 
-It's heavily recommended to use a Python virtual environment to avoid versioning conflicts. Ensure that `tesseract-ocr` is installed on your operating system.
+## Setup
+
+Need Python 3.8+ and a webcam.
 
 ```bash
-# Set up a virtual environment
+# create virtual environment
 python3 -m venv venv
 source venv/bin/activate
 
-# Install the Python dependencies
-python -m pip install --upgrade pip
+# install packages
 pip install opencv-python numpy pytesseract pandas
 ```
 
-### OS Dependencies
-- Ubuntu/Debian: `sudo apt install tesseract-ocr`
+### Install Tesseract
+- Ubuntu: `sudo apt install tesseract-ocr`
 - macOS: `brew install tesseract`
 
-## Usage Guide
-Navigate to the `src` directory or run the modules directly. They logically progress sequentially:
+## Running the project
 
-1. **Test Camera**
-   ```bash
-   python src/camera.py
-   ```
-2. **Detect Plates**
-   ```bash
-   python src/detect.py
-   ```
-3. **Align Plates**
-   ```bash
-   python src/align.py
-   ```
-4. **Extract Text (OCR)**
-   ```bash
-   python src/ocr.py
-   ```
-5. **Validate OCR Strings**
-   ```bash
-   python src/validate.py
-   ```
-6. **Full Sequence** (The final working system logging to CSV)
-   ```bash
-   python src/temporal.py
-   ```
+Test each part:
+```bash
+python src/camera.py      # check camera
+python src/detect.py      # test detection
+python src/align.py       # test alignment
+python src/ocr.py         # test OCR
+python src/validate.py    # test validation
+python src/temporal.py    # run full system
+```
 
-Press `q` to exit the graphical windows.
+Press `q` to quit.
+
+## Testing
+
+Tested on real cars at school parking. Works best with:
+- Good lighting
+- 2-5 meters distance
+- Clean plates
+- Camera pointing straight
+
+## Issues I found
+
+- Sometimes mixes up B/8 and O/0
+- Doesn't work well in bad lighting or at extreme angles
+- Need to be fairly close to the vehicle
+
+## Dependencies
+
+- opencv-python
+- numpy
+- pytesseract
+- pandas
